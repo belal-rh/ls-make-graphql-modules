@@ -48,6 +48,7 @@ Die vollständige Navigation befindet sich unter [`docs/README.md`](docs/README.
 ├── scripts/
 │   └── upload_learningsuite_image.py
 ├── deploy_learningsuite_make_app.py
+├── deploy_learningsuite_make_app_compatible.py
 └── requirements.txt
 ```
 
@@ -80,14 +81,16 @@ pip install -r requirements.txt
 export MAKE_API_TOKEN="DEIN_MAKE_TOKEN"
 export MAKE_ZONE="eu1"
 
-python deploy_learningsuite_make_app.py
+python deploy_learningsuite_make_app_compatible.py
 ```
 
 Testlauf ohne Änderungen:
 
 ```bash
-python deploy_learningsuite_make_app.py --dry-run
+python deploy_learningsuite_make_app_compatible.py --dry-run
 ```
+
+Der kompatible Deployer unterstützt beide aktuell beobachteten Request-Formate für `POST /sdk/apps`: App-Felder direkt auf oberster Ebene sowie den von Make dokumentierten `app`-Wrapper. Der bisherige Deployer bleibt als Kernmodul bestehen.
 
 Der aktuelle Deployer enthält die bestätigten FETCH-, CREATE-, UPDATE- und Preset-Thumbnail-Module. Die UploadSpec-Operationen sind in YAML dokumentiert und können über den Python-Helper ausgeführt werden.
 
