@@ -1,0 +1,78 @@
+id: LS-SECTION-002
+name: Sektion aktualisieren
+object: Section
+action: update
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: EditSection
+  sha256Hash: b875f283e6678a486f47aec32cda3eada719c2f8cfd12614fc2af6fe06f0d6f0
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+preflight:
+  operation: TopicQuery
+  purpose: Resolve the Section Node ID and load the current section state.
+
+parameters:
+  editSection:
+    type: object
+    required: true
+    properties:
+      id:
+        type: string
+        required: true
+        id_type: NodeID
+      name:
+        type: string
+        required: true
+      description:
+        type: string
+        required: false
+      lessonsDoneOneByOne:
+        type: boolean
+        required: true
+
+request:
+  operationName: EditSection
+  variables:
+    editSection: "{{editSection}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: b875f283e6678a486f47aec32cda3eada719c2f8cfd12614fc2af6fe06f0d6f0
+
+response:
+  success_path: data.editSection
+  cardinality: one
+  outputs:
+    id:
+      path: data.editSection.id
+      type: NodeID
+    name:
+      path: data.editSection.name
+      type: string
+    description:
+      path: data.editSection.description
+      type: string
+
+verification:
+  operation: TopicQuery
+  match_by: id
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: editSection
+  label: Sektion aktualisieren
+  type: action
