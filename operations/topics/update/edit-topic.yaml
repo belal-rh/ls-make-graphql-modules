@@ -1,0 +1,77 @@
+id: LS-TOPIC-004
+name: Modul aktualisieren
+object: Topic
+action: update
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: EditTopic
+  sha256Hash: 5a49c91efbc2c8581ba26dda9f4768acbf47f0e83bc6d7a58c465dd3403c4dfd
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+preflight:
+  operations:
+    - CoursePaths
+    - TopicQuery
+  purpose: Resolve the Topic Node ID and load the current module structure.
+
+parameters:
+  editTopic:
+    type: object
+    required: true
+    properties:
+      id:
+        type: string
+        required: true
+        id_type: NodeID
+      name:
+        type: string
+        required: false
+      description:
+        type: string
+        required: false
+
+request:
+  operationName: EditTopic
+  variables:
+    editTopic: "{{editTopic}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 5a49c91efbc2c8581ba26dda9f4768acbf47f0e83bc6d7a58c465dd3403c4dfd
+
+response:
+  success_path: data.editTopic
+  cardinality: one
+  outputs:
+    id:
+      path: data.editTopic.id
+      type: NodeID
+    name:
+      path: data.editTopic.name
+      type: string
+    description:
+      path: data.editTopic.description
+      type: string
+
+verification:
+  operation: TopicQuery
+  match_by: id
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: editTopic
+  label: Modul aktualisieren
+  type: action
