@@ -1,0 +1,69 @@
+id: LS-LESSON-001
+name: Lektion erstellen
+object: Lesson
+action: create
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: AddLesson
+  sha256Hash: 644f5a8990fdb54d69e769c2921ce742119075e7d67e80bb5d141738296aa7e7
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+preflight:
+  operation: TopicQuery
+  purpose: Resolve the Section Node ID and prevent duplicate lessons.
+
+parameters:
+  sectionId:
+    type: string
+    required: true
+    id_type: NodeID
+  name:
+    type: string
+    required: true
+
+request:
+  operationName: AddLesson
+  variables:
+    sectionId: "{{sectionId}}"
+    name: "{{name}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 644f5a8990fdb54d69e769c2921ce742119075e7d67e80bb5d141738296aa7e7
+
+response:
+  success_path: data.createLesson
+  cardinality: one
+  outputs:
+    id:
+      path: data.createLesson.id
+      type: NodeID
+    name:
+      path: data.createLesson.name
+      type: string
+    description:
+      path: data.createLesson.description
+      type: string
+
+verification:
+  operation: TopicQuery
+  match_by: lesson_id_or_name
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: addLesson
+  label: Lektion erstellen
+  type: action
