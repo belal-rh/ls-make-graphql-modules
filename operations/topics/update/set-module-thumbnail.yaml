@@ -1,0 +1,67 @@
+id: LS-TOPIC-005
+name: Modul-Thumbnail setzen
+object: Topic
+action: update
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: SetModuleThumbnail
+  sha256Hash: fa2764b86629193cd84f19da0a4777f22011e2db9bdeb3e0263643fd738575a1
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  moduleId:
+    type: string
+    required: true
+    id_type: NodeID
+  thumbnailId:
+    type: string
+    required: true
+    id_type: NodeID
+  content:
+    type: object
+    required: true
+    properties:
+      overline:
+        type: string
+        required: true
+      text:
+        type: array
+        required: true
+
+request:
+  operationName: SetModuleThumbnail
+  variables:
+    moduleId: "{{moduleId}}"
+    thumbnailId: "{{thumbnailId}}"
+    content: "{{content}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: fa2764b86629193cd84f19da0a4777f22011e2db9bdeb3e0263643fd738575a1
+
+response:
+  success_path: data.setModuleThumbnail
+  cardinality: one
+  outputs:
+    id:
+      path: data.setModuleThumbnail.id
+      type: NodeID
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: setModuleThumbnail
+  label: Modul-Thumbnail setzen
+  type: action
