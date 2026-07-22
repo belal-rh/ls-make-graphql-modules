@@ -1,0 +1,69 @@
+id: LS-TOPIC-006
+name: Modulbild hochladen
+object: Topic
+action: upload
+status: observed
+
+operation:
+  name: TopicEditSetImage
+  sha256Hash: 06538877b15a180f42502d24f7ced1a2c0b0fcd86d887683d13c2292b1852451
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  topicId:
+    type: string
+    required: true
+    id_type: NodeID
+
+request:
+  operationName: TopicEditSetImage
+  variables:
+    topicId: "{{topicId}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 06538877b15a180f42502d24f7ced1a2c0b0fcd86d887683d13c2292b1852451
+
+response:
+  success_path: data.setTopicImage
+  cardinality: one
+  type: UploadSpec
+  outputs:
+    id:
+      path: data.setTopicImage.id
+      type: string
+    requestHeaders:
+      path: data.setTopicImage.requestHeaders
+      type: object
+    uploadUrl:
+      path: data.setTopicImage.uploadUrl
+      type: string
+      sensitive: true
+
+upload:
+  method: PUT
+  url: "{{response.uploadUrl}}"
+  headers: "{{response.requestHeaders}}"
+  body_type: binary
+  include_bearer_token: false
+
+verification:
+  operation: TopicQuery
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: uploadTopicImage
+  label: Modulbild hochladen
+  type: action
+  implementation_status: planned
