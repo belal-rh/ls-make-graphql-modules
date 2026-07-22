@@ -2,94 +2,87 @@
 
 Zentrale Sammlung aller dokumentierten LearningSuite-GraphQL-Operationen, Persisted Queries und Entwicklungswerkzeuge.
 
-Das Repository dient als **Single Source of Truth** für die inoffizielle LearningSuite-API. Jede bestätigte Operation wird einmal technisch dokumentiert und kann anschließend für Make Custom Apps, Python-Skripte, Tests und weitere Integrationen wiederverwendet werden.
+Das Repository dient als **Single Source of Truth** für die inoffizielle LearningSuite-API. Jede bestätigte Operation wird einmal dokumentiert und kann anschließend für Make Custom Apps, Python-Skripte, Tests und weitere Integrationen wiederverwendet werden.
 
-## Inhalt
+## Aktueller Stand
 
-- Dokumentation aller bestätigten GraphQL-Requests
-- Persisted-Query-Hashes und Variablen
-- Beispielhafte Request- und Response-Payloads
-- Make-Custom-App-Deployer
-- Python-Hilfstools
-- Maschinenlesbare YAML-Definitionen
-- Testfälle und spätere Validierungen
+Dokumentiert sind derzeit:
 
-## Dokumentationsphasen
-
-Die API-Dokumentation wird schrittweise aufgebaut:
-
-1. **FETCH** – Daten abrufen und bestehende Strukturen prüfen
-2. **CREATION** – Kurse, Module, Sektionen und Lektionen erstellen
-3. **UPDATE** – bestehende Objekte und Thumbnails aktualisieren
-
-Aktuell dokumentiert ist die FETCH-Phase.
-
-## FETCH-Operationen
+### FETCH
 
 | Objekt | Operation | Zweck |
 |---|---|---|
 | Course | `AuthoredCourses` | Alle verfügbaren Kurse abrufen |
 | Course | `CourseInfoQuery` | Details und Beschreibung eines Kurses abrufen |
-| Course / Topic | `CoursePaths` | Alle Module eines Kurses abrufen |
+| Course / Topic | `CoursePaths` | Module eines Kurses abrufen |
 | Topic | `TopicQuery` | Sektionen und Lektionen eines Moduls abrufen |
 
-Siehe [`docs/fetch/README.md`](docs/fetch/README.md).
+### CREATE
 
-## Repository-Struktur
+| Objekt | Operation | Zweck |
+|---|---|---|
+| Course | `AddCourse` | Kurs erstellen |
+| Topic | `CreateTopic` | Eigenständiges Modul in der Bibliothek erstellen |
+| Topic / Course | `AddTopicToCourse` | Modul direkt in einem Kurs erstellen |
+| Section | `AddSection` | Sektion innerhalb eines Moduls erstellen |
+| Lesson | `AddLesson` | Lektion innerhalb einer Sektion erstellen |
+
+Die vollständige Navigation befindet sich unter [`docs/README.md`](docs/README.md).
+
+## Objektorientierte Struktur
 
 ```text
 .
 ├── README.md
 ├── docs/
+│   ├── README.md
 │   ├── authentication.md
 │   ├── conventions.md
-│   └── fetch/
-│       ├── README.md
-│       ├── courses/
-│       │   ├── authored-courses.md
-│       │   ├── course-info-query.md
-│       │   └── course-paths.md
-│       └── topics/
-│           └── topic-query.md
+│   ├── courses/
+│   │   ├── fetch/
+│   │   └── create/
+│   ├── topics/
+│   │   ├── fetch/
+│   │   └── create/
+│   ├── sections/
+│   │   └── create/
+│   └── lessons/
+│       └── create/
 ├── operations/
-│   └── fetch/
-│       ├── courses/
-│       │   ├── authored-courses.yaml
-│       │   ├── course-info-query.yaml
-│       │   └── course-paths.yaml
-│       └── topics/
-│           └── topic-query.yaml
+│   ├── courses/
+│   │   ├── fetch/
+│   │   └── create/
+│   ├── topics/
+│   │   ├── fetch/
+│   │   └── create/
+│   ├── sections/
+│   │   └── create/
+│   └── lessons/
+│       └── create/
 ├── deploy_learningsuite_make_app.py
 └── requirements.txt
 ```
 
-## Grundprinzip: Fetch before Update
+Die Markdown-Dateien sind für Menschen gedacht. Die YAML-Dateien unter `operations/` bilden die maschinenlesbare Grundlage für Generatoren, Make-Module und Tests.
 
-Bevor ein Objekt erstellt oder verändert wird, sollte zuerst der aktuelle Zustand geladen werden. Dadurch lassen sich Duplikate, falsche IDs und unbeabsichtigtes Überschreiben vermeiden.
+## Grundprinzip: Fetch before Mutation
+
+Bevor ein Objekt erstellt oder verändert wird, soll zuerst der aktuelle Zustand geladen werden. Dadurch lassen sich Duplikate, falsche IDs und unbeabsichtigte Änderungen vermeiden.
 
 ## Persisted Queries
 
-LearningSuite sendet keinen vollständigen GraphQL-Query-String. Stattdessen besteht ein Request aus:
+LearningSuite sendet keinen vollständigen GraphQL-Query-String. Ein Request besteht im Kern aus:
 
 - `operationName`
 - `variables`
 - `extensions.persistedQuery.version`
 - `extensions.persistedQuery.sha256Hash`
 
-Ändert LearningSuite eine Operation, kann der bisherige Hash ungültig werden. Typischer Fehler:
-
-```text
-PersistedQueryNotFound
-```
-
-Dann muss der aktuelle RAW-Request im Browser erfasst und der Hash in Dokumentation und Code aktualisiert werden.
+Bei `PersistedQueryNotFound` muss der aktuelle RAW-Request im Browser erfasst und der Hash in Dokumentation, YAML und Code aktualisiert werden.
 
 ## Make Custom App deployen
 
-Der Make-API-Token benötigt:
-
-- `sdk-apps:read`
-- `sdk-apps:write`
+Der Make-API-Token benötigt `sdk-apps:read` und `sdk-apps:write`.
 
 ```bash
 python3 -m venv .venv
@@ -111,7 +104,7 @@ python deploy_learningsuite_make_app.py --dry-run
 ## Sicherheit
 
 - Zugangsdaten gehören ausschließlich in Make-Connections oder Umgebungsvariablen.
-- Tokens und Passwörter dürfen nicht committed werden.
+- Tokens, Passwörter und lokale `.env`-Dateien dürfen nicht committed werden.
 - Node IDs und SIDs müssen entsprechend ihrer dokumentierten Verwendung eingesetzt werden.
 
 ## Status
