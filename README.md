@@ -2,30 +2,18 @@
 
 Zentrale Sammlung aller dokumentierten LearningSuite-GraphQL-Operationen, Persisted Queries und Entwicklungswerkzeuge.
 
-Das Repository dient als **Single Source of Truth** für die inoffizielle LearningSuite-API. Jede bestätigte Operation wird einmal dokumentiert und kann anschließend für Make Custom Apps, Python-Skripte, Tests und weitere Integrationen wiederverwendet werden.
+Das Repository dient als **Single Source of Truth** für die inoffizielle LearningSuite-API. Jede bestätigte oder beobachtete Operation wird technisch dokumentiert und kann anschließend für Make Custom Apps, Python-Skripte, Tests und weitere Integrationen wiederverwendet werden.
 
 ## Aktueller Stand
 
-Dokumentiert sind derzeit:
+Dokumentiert sind derzeit **19 GraphQL-Operationen**:
 
-### FETCH
-
-| Objekt | Operation | Zweck |
-|---|---|---|
-| Course | `AuthoredCourses` | Alle verfügbaren Kurse abrufen |
-| Course | `CourseInfoQuery` | Details und Beschreibung eines Kurses abrufen |
-| Course / Topic | `CoursePaths` | Module eines Kurses abrufen |
-| Topic | `TopicQuery` | Sektionen und Lektionen eines Moduls abrufen |
-
-### CREATE
-
-| Objekt | Operation | Zweck |
-|---|---|---|
-| Course | `AddCourse` | Kurs erstellen |
-| Topic | `CreateTopic` | Eigenständiges Modul in der Bibliothek erstellen |
-| Topic / Course | `AddTopicToCourse` | Modul direkt in einem Kurs erstellen |
-| Section | `AddSection` | Sektion innerhalb eines Moduls erstellen |
-| Lesson | `AddLesson` | Lektion innerhalb einer Sektion erstellen |
+| Bereich | Anzahl | Operationen |
+|---|---:|---|
+| FETCH | 4 | `AuthoredCourses`, `CourseInfoQuery`, `CoursePaths`, `TopicQuery` |
+| CREATE | 5 | `AddCourse`, `CreateTopic`, `AddTopicToCourse`, `AddSection`, `AddLesson` |
+| UPDATE | 5 | `UpdateCourse`, `EditTopic`, `EditSection`, `SetCourseThumbnail`, `SetModuleThumbnail` |
+| UPLOAD | 5 | `SetCourseImage`, `SetCourseThumbnailBG`, `TopicEditSetImage`, `SetModuleThumbnailBG`, `SetLessonImage` |
 
 Die vollständige Navigation befindet sich unter [`docs/README.md`](docs/README.md).
 
@@ -38,27 +26,27 @@ Die vollständige Navigation befindet sich unter [`docs/README.md`](docs/README.
 │   ├── README.md
 │   ├── authentication.md
 │   ├── conventions.md
+│   ├── uploads.md
 │   ├── courses/
 │   │   ├── fetch/
-│   │   └── create/
+│   │   ├── create/
+│   │   ├── update/
+│   │   └── upload/
 │   ├── topics/
 │   │   ├── fetch/
-│   │   └── create/
+│   │   ├── create/
+│   │   ├── update/
+│   │   └── upload/
 │   ├── sections/
-│   │   └── create/
+│   │   ├── create/
+│   │   └── update/
 │   └── lessons/
-│       └── create/
+│       ├── create/
+│       └── upload/
 ├── operations/
-│   ├── courses/
-│   │   ├── fetch/
-│   │   └── create/
-│   ├── topics/
-│   │   ├── fetch/
-│   │   └── create/
-│   ├── sections/
-│   │   └── create/
-│   └── lessons/
-│       └── create/
+│   └── <object>/<action>/*.yaml
+├── scripts/
+│   └── upload_learningsuite_image.py
 ├── deploy_learningsuite_make_app.py
 └── requirements.txt
 ```
@@ -101,12 +89,40 @@ Testlauf ohne Änderungen:
 python deploy_learningsuite_make_app.py --dry-run
 ```
 
+Der aktuelle Deployer enthält die bestätigten FETCH-, CREATE-, UPDATE- und Preset-Thumbnail-Module. Die UploadSpec-Operationen sind in YAML dokumentiert und können über den Python-Helper ausgeführt werden.
+
+## Bilder hochladen
+
+Für echte Bilddateien wird zunächst per GraphQL eine signierte Upload-URL angefordert. Anschließend wird die Datei direkt per `PUT` zu Google Cloud Storage übertragen.
+
+```bash
+cp .env.example .env
+export LS_TENANT_ID="DEIN_TENANT"
+export LS_EMAIL="DEINE_EMAIL"
+export LS_PASSWORD="DEIN_PASSWORT"
+
+python scripts/upload_learningsuite_image.py course-image \
+  --node-id "<COURSE_NODE_ID>" \
+  --file "./kursbild.png"
+```
+
+Verfügbare Ziele:
+
+- `course-image`
+- `course-thumbnail-bg`
+- `topic-image`
+- `module-thumbnail-bg`
+- `lesson-image`
+
+Weitere Details: [`docs/uploads.md`](docs/uploads.md).
+
 ## Sicherheit
 
 - Zugangsdaten gehören ausschließlich in Make-Connections oder Umgebungsvariablen.
-- Tokens, Passwörter und lokale `.env`-Dateien dürfen nicht committed werden.
+- Tokens, Passwörter, signierte Upload-URLs und lokale `.env`-Dateien dürfen nicht committed werden.
 - Node IDs und SIDs müssen entsprechend ihrer dokumentierten Verwendung eingesetzt werden.
+- Beim GCP-Upload darf kein LearningSuite-Bearer-Token mitgesendet werden.
 
 ## Status
 
-Die LearningSuite-GraphQL-Schnittstelle ist nicht offiziell dokumentiert. Alle Angaben basieren auf beobachteten und bestätigten Requests und müssen bei Änderungen der LearningSuite-Webanwendung erneut geprüft werden.
+Die LearningSuite-GraphQL-Schnittstelle ist nicht offiziell dokumentiert. `verified`-Operationen wurden grundlegend bestätigt; als `observed` markierte Upload-Operationen benötigen noch automatisierte Ende-zu-Ende-Tests.
