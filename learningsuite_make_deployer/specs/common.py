@@ -62,7 +62,9 @@ def gql_request(
     iterate: str | None = None,
 ) -> dict[str, Any]:
     response: dict[str, Any] = {
-        "valid": {"condition": "{{empty(body.errors)}}"},
+        # GraphQL omits `errors` on success. Make IML supports logical negation,
+        # while an `empty()` helper is not available in this runtime.
+        "valid": {"condition": "{{!body.errors}}"},
         "error": {
             "200": {"message": "LearningSuite GraphQL-Fehler: {{body.errors}}"},
             "message": "[{{statusCode}}] LearningSuite-Anfrage fehlgeschlagen: {{body}}",
