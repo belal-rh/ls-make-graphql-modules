@@ -1,0 +1,81 @@
+id: LS-COURSE-005
+name: Kurs aktualisieren
+object: Course
+action: update
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: UpdateCourse
+  sha256Hash: 4149001c35a4454bc69fbc0231a22003d2692ca74d083567b69029fd5a4961e5
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+preflight:
+  operation: CourseInfoQuery
+  purpose: Load current course data and preserve rich-text content.
+
+parameters:
+  data:
+    type: object
+    required: true
+    properties:
+      id:
+        type: string
+        required: true
+        id_type: NodeID
+      name:
+        type: string
+        required: false
+      summary:
+        type: string
+        required: false
+      descriptionRichText:
+        type: array
+        required: false
+
+request:
+  operationName: UpdateCourse
+  variables:
+    data: "{{data}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 4149001c35a4454bc69fbc0231a22003d2692ca74d083567b69029fd5a4961e5
+
+response:
+  success_path: data.updateCourse
+  cardinality: one
+  outputs:
+    id:
+      path: data.updateCourse.id
+      type: NodeID
+    name:
+      path: data.updateCourse.name
+      type: string
+    summary:
+      path: data.updateCourse.summary
+      type: string
+    descriptionRichText:
+      path: data.updateCourse.descriptionRichText
+      type: array
+
+verification:
+  operation: CourseInfoQuery
+  match_by: id
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: updateCourseDescription
+  label: Kurs aktualisieren
+  type: action
