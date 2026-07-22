@@ -1,0 +1,66 @@
+id: LS-COURSE-008
+name: Kurs-Thumbnail-Hintergrund hochladen
+object: Course
+action: upload
+status: observed
+
+operation:
+  name: SetCourseThumbnailBG
+  sha256Hash: 8696c20b2d6f76cf22e9b1cdc5633b662a5e6fdffaccf405c93846474da076e2
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  courseId:
+    type: string
+    required: true
+    id_type: NodeID
+
+request:
+  operationName: SetCourseThumbnailBG
+  variables:
+    courseId: "{{courseId}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 8696c20b2d6f76cf22e9b1cdc5633b662a5e6fdffaccf405c93846474da076e2
+
+response:
+  success_path: data.setCourseThumbnailBGImage
+  cardinality: one
+  type: UploadSpec
+  outputs:
+    id:
+      path: data.setCourseThumbnailBGImage.id
+      type: string
+    requestHeaders:
+      path: data.setCourseThumbnailBGImage.requestHeaders
+      type: object
+    uploadUrl:
+      path: data.setCourseThumbnailBGImage.uploadUrl
+      type: string
+      sensitive: true
+
+upload:
+  method: PUT
+  url: "{{response.uploadUrl}}"
+  headers: "{{response.requestHeaders}}"
+  body_type: binary
+  include_bearer_token: false
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: uploadCourseThumbnailBackground
+  label: Kurs-Thumbnail-Hintergrund hochladen
+  type: action
+  implementation_status: planned
