@@ -1,0 +1,74 @@
+id: LS-TOPIC-002
+name: Eigenständiges Modul erstellen
+object: Topic
+action: create
+status: observed
+last_observed_at: 2026-07-20
+
+operation:
+  name: CreateTopic
+  sha256Hash: cc092ff870aa21654e2a2cb7c790c0d9e8fdc9ac64ab1aaaedfa0cc19ab33cdf
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  name:
+    type: string
+    required: true
+  description:
+    type: string
+    required: false
+    default: ""
+  folderId:
+    type: string
+    required: unknown
+    nullable: true
+    id_type: NodeID
+    validation_note: Null and required behavior are not fully verified.
+  sectionName:
+    type: string
+    required: true
+
+request:
+  operationName: CreateTopic
+  variables:
+    name: "{{name}}"
+    description: "{{description}}"
+    folderId: "{{folderId}}"
+    sectionName: "{{sectionName}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: cc092ff870aa21654e2a2cb7c790c0d9e8fdc9ac64ab1aaaedfa0cc19ab33cdf
+
+response:
+  success_path: data.createTopic
+  cardinality: one
+  outputs:
+    id:
+      path: data.createTopic.id
+      type: NodeID
+    name:
+      path: data.createTopic.name
+      type: string
+
+open_questions:
+  - Is folderId optional or must null be sent explicitly?
+  - Is the initial section always created?
+  - Which additional fields exist in the full response?
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: createStandaloneTopic
+  label: Bibliotheksmodul erstellen
+  type: action
