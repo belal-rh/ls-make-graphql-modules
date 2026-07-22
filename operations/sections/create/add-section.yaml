@@ -1,0 +1,85 @@
+id: LS-SECTION-001
+name: Sektion erstellen
+object: Section
+action: create
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: AddSection
+  sha256Hash: 729bbd9af3894f4950dd0823350975645c2834fe4303c92c25350f0316a7f2ac
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+preflight:
+  operation: TopicQuery
+  purpose: Resolve the Topic Node ID and compare existing sections.
+
+parameters:
+  topicId:
+    type: string
+    required: true
+    id_type: NodeID
+  name:
+    type: string
+    required: true
+  description:
+    type: string
+    required: false
+    default: ""
+  lessonsDoneOneByOne:
+    type: boolean
+    required: true
+    default: false
+
+request:
+  operationName: AddSection
+  variables:
+    topicId: "{{topicId}}"
+    data:
+      name: "{{name}}"
+      description: "{{description}}"
+      lessonsDoneOneByOne: "{{lessonsDoneOneByOne}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 729bbd9af3894f4950dd0823350975645c2834fe4303c92c25350f0316a7f2ac
+
+response:
+  success_path: data.createSection
+  cardinality: one_topic_with_many_sections
+  outputs:
+    topicId:
+      path: data.createSection.id
+      type: NodeID
+    sections:
+      path: data.createSection.sections
+      type: array
+    sectionId:
+      path: data.createSection.sections[].id
+      type: NodeID
+    sectionName:
+      path: data.createSection.sections[].name
+      type: string
+
+matching:
+  note: The response contains all sections. Identify the new section by name or by diffing against the preflight response.
+
+verification:
+  operation: TopicQuery
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: addSection
+  label: Sektion erstellen
+  type: action
