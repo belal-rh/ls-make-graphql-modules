@@ -1,0 +1,65 @@
+id: LS-COURSE-003
+name: Module eines Kurses abrufen
+object: CourseTopicRelation
+action: fetch
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: CoursePaths
+  sha256Hash: dcb1132ae4701875b7ce74fc38afd5ae97ea08df83c06959bff99f3ebe28227b
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  courseSid:
+    type: string
+    required: true
+    id_type: SID
+    description: Short ID of the course.
+
+request:
+  operationName: CoursePaths
+  variables:
+    courseSid: "{{courseSid}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: dcb1132ae4701875b7ce74fc38afd5ae97ea08df83c06959bff99f3ebe28227b
+
+response:
+  success_path: data.course.modules
+  cardinality: many
+  item_path: data.course.modules[].module
+  outputs:
+    courseId:
+      path: data.course.id
+      type: NodeID
+    id:
+      path: data.course.modules[].module.id
+      type: NodeID
+    sid:
+      path: data.course.modules[].module.sid
+      type: SID
+    name:
+      path: data.course.modules[].module.name
+      type: string
+    description:
+      path: data.course.modules[].module.description
+      type: string
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: listCourseTopics
+  label: Module eines Kurses auflisten
+  type: search
