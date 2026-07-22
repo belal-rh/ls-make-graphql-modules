@@ -1,0 +1,75 @@
+id: LS-COURSE-004
+name: Kurs erstellen
+object: Course
+action: create
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: AddCourse
+  sha256Hash: cc30311057ac58b722e109432dd275e82c7d26b2d217c6231d5825876525a990
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+preflight:
+  operation: AuthoredCourses
+  purpose: Prevent duplicate courses before creation.
+
+parameters:
+  name:
+    type: string
+    required: true
+  summary:
+    type: string
+    required: false
+    default: ""
+  descriptionRichText:
+    type: array
+    required: true
+    default:
+      - type: paragraph
+        children:
+          - text: ""
+
+request:
+  operationName: AddCourse
+  variables:
+    courseCreationInput:
+      name: "{{name}}"
+      summary: "{{summary}}"
+      descriptionRichText: "{{descriptionRichText}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: cc30311057ac58b722e109432dd275e82c7d26b2d217c6231d5825876525a990
+
+response:
+  success_path: data.createCourse
+  cardinality: one
+  outputs:
+    id:
+      path: data.createCourse.id
+      type: NodeID
+    sid:
+      path: data.createCourse.sid
+      type: SID
+
+verification:
+  operation: CourseInfoQuery
+  match_by: sid
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: createCourse
+  label: Kurs erstellen
+  type: action
