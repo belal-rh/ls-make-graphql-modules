@@ -1,0 +1,67 @@
+id: LS-COURSE-006
+name: Kurs-Thumbnail setzen
+object: Course
+action: update
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: SetCourseThumbnail
+  sha256Hash: 9547b4268d57319d17a265dbc15e994b2efe11e6a6e08e07ad7669874b04576e
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  courseId:
+    type: string
+    required: true
+    id_type: NodeID
+  thumbnailId:
+    type: string
+    required: true
+    id_type: NodeID
+  content:
+    type: object
+    required: true
+    properties:
+      overline:
+        type: string
+        required: true
+      text:
+        type: array
+        required: true
+
+request:
+  operationName: SetCourseThumbnail
+  variables:
+    courseId: "{{courseId}}"
+    thumbnailId: "{{thumbnailId}}"
+    content: "{{content}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 9547b4268d57319d17a265dbc15e994b2efe11e6a6e08e07ad7669874b04576e
+
+response:
+  success_path: data.setCourseThumbnail
+  cardinality: one
+  outputs:
+    id:
+      path: data.setCourseThumbnail.id
+      type: NodeID
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: setCourseThumbnail
+  label: Kurs-Thumbnail setzen
+  type: action
