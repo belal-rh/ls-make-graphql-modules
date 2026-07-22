@@ -1,0 +1,66 @@
+id: LS-TOPIC-007
+name: Modul-Thumbnail-Hintergrund hochladen
+object: Topic
+action: upload
+status: observed
+
+operation:
+  name: SetModuleThumbnailBG
+  sha256Hash: 9ece459af9b322066a99dbc1f392bc8d89763b98788304fefce6455e4d0baba6
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  moduleId:
+    type: string
+    required: true
+    id_type: NodeID
+
+request:
+  operationName: SetModuleThumbnailBG
+  variables:
+    moduleId: "{{moduleId}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 9ece459af9b322066a99dbc1f392bc8d89763b98788304fefce6455e4d0baba6
+
+response:
+  success_path: data.setModuleThumbnailBGImage
+  cardinality: one
+  type: UploadSpec
+  outputs:
+    id:
+      path: data.setModuleThumbnailBGImage.id
+      type: string
+    requestHeaders:
+      path: data.setModuleThumbnailBGImage.requestHeaders
+      type: object
+    uploadUrl:
+      path: data.setModuleThumbnailBGImage.uploadUrl
+      type: string
+      sensitive: true
+
+upload:
+  method: PUT
+  url: "{{response.uploadUrl}}"
+  headers: "{{response.requestHeaders}}"
+  body_type: binary
+  include_bearer_token: false
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: uploadModuleThumbnailBackground
+  label: Modul-Thumbnail-Hintergrund hochladen
+  type: action
+  implementation_status: planned
