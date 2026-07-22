@@ -23,36 +23,35 @@ Die vollständige Navigation befindet sich unter [`docs/README.md`](docs/README.
 .
 ├── README.md
 ├── docs/
-│   ├── README.md
-│   ├── authentication.md
-│   ├── conventions.md
-│   ├── uploads.md
-│   ├── courses/
-│   │   ├── fetch/
-│   │   ├── create/
-│   │   ├── update/
-│   │   └── upload/
-│   ├── topics/
-│   │   ├── fetch/
-│   │   ├── create/
-│   │   ├── update/
-│   │   └── upload/
-│   ├── sections/
-│   │   ├── create/
-│   │   └── update/
-│   └── lessons/
-│       ├── create/
-│       └── upload/
+│   └── <object>/<action>/*.md
 ├── operations/
 │   └── <object>/<action>/*.yaml
+├── learningsuite_make_deployer/
+│   ├── cli.py
+│   ├── client.py
+│   ├── settings.py
+│   ├── specs/
+│   │   ├── common.py
+│   │   ├── courses.py
+│   │   ├── topics.py
+│   │   ├── sections.py
+│   │   ├── lessons.py
+│   │   └── universal.py
+│   └── services/
+│       ├── apps.py
+│       ├── connections.py
+│       ├── modules.py
+│       └── deployment.py
 ├── scripts/
 │   └── upload_learningsuite_image.py
+├── tests/
+│   └── test_idempotency.py
 ├── deploy_learningsuite_make_app.py
 ├── deploy_learningsuite_make_app_compatible.py
 └── requirements.txt
 ```
 
-Die Markdown-Dateien sind für Menschen gedacht. Die YAML-Dateien unter `operations/` bilden die maschinenlesbare Grundlage für Generatoren, Make-Module und Tests.
+Die beiden Dateien im Repository-Root sind nur schlanke CLI-Einstiegspunkte. Die eigentliche Deployment-Logik liegt modular im Paket `learningsuite_make_deployer`.
 
 ## Grundprinzip: Fetch before Mutation
 
@@ -81,16 +80,45 @@ pip install -r requirements.txt
 export MAKE_API_TOKEN="DEIN_MAKE_TOKEN"
 export MAKE_ZONE="eu1"
 
-python deploy_learningsuite_make_app_compatible.py
+python deploy_learningsuite_make_app.py
 ```
 
 Testlauf ohne Änderungen:
 
 ```bash
-python deploy_learningsuite_make_app_compatible.py --dry-run
+python deploy_learningsuite_make_app.py --dry-run
 ```
 
-Der kompatible Deployer unterstützt beide aktuell beobachteten Request-Formate für `POST /sdk/apps`: App-Felder direkt auf oberster Ebene sowie den von Make dokumentierten `app`-Wrapper. Der bisherige Deployer bleibt als Kernmodul bestehen.
+Der frühere Einstiegspunkt bleibt kompatibel:
+
+```bash
+python deploy_learningsuite_make_app_compatible.py
+```
+
+### Idempotenz und Sichtbarkeit
+
+Der Deployer sucht vorhandene Apps, Connections und Module und aktualisiert diese, statt Duplikate anzulegen. Bestehende Module werden nicht automatisch gelöscht oder mit einem anderen Modultyp neu erstellt.
+
+Die Sichtbarkeit wird standardmäßig nicht verändert:
+
+```text
+--visibility preserve
+--module-visibility preserve
+```
+
+Dadurch versucht ein erneuter Lauf insbesondere nicht, eine bereits veröffentlichte App wieder privat zu machen. Eine Sichtbarkeitsänderung erfolgt nur ausdrücklich:
+
+```bash
+python deploy_learningsuite_make_app.py --visibility public
+```
+
+`--visibility private` darf nur für noch nicht veröffentlichte Apps verwendet werden. Make erlaubt es nicht, eine veröffentlichte App wieder privat zu machen.
+
+Tests ausführen:
+
+```bash
+python -m unittest discover -s tests -v
+```
 
 Der aktuelle Deployer enthält die bestätigten FETCH-, CREATE-, UPDATE- und Preset-Thumbnail-Module. Die UploadSpec-Operationen sind in YAML dokumentiert und können über den Python-Helper ausgeführt werden.
 
