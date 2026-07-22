@@ -1,0 +1,78 @@
+id: LS-TOPIC-003
+name: Modul direkt in einem Kurs erstellen
+object: Topic
+action: create
+status: verified
+last_verified_at: 2026-07-20
+
+operation:
+  name: AddTopicToCourse
+  sha256Hash: 4f527eaf6c524c2319bc1607a67ab52667028bd7f00d231e77dbd3ea4554b573
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+preflight:
+  operations:
+    - AuthoredCourses
+    - CoursePaths
+  purpose: Resolve the Course Node ID and prevent duplicate modules.
+
+parameters:
+  courseId:
+    type: string
+    required: true
+    id_type: NodeID
+  name:
+    type: string
+    required: true
+  description:
+    type: string
+    required: false
+    default: ""
+  sectionName:
+    type: string
+    required: true
+
+request:
+  operationName: AddTopicToCourse
+  variables:
+    courseId: "{{courseId}}"
+    name: "{{name}}"
+    description: "{{description}}"
+    sectionName: "{{sectionName}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 4f527eaf6c524c2319bc1607a67ab52667028bd7f00d231e77dbd3ea4554b573
+
+response:
+  success_path: data.addTopicToCourse
+  cardinality: one
+  outputs:
+    id:
+      path: data.addTopicToCourse.id
+      type: NodeID
+    sid:
+      path: data.addTopicToCourse.sid
+      type: SID
+
+verification:
+  operations:
+    - CoursePaths
+    - TopicQuery
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: addTopicToCourse
+  label: Modul zu Kurs hinzufügen
+  type: action
