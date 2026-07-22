@@ -1,0 +1,69 @@
+id: LS-LESSON-002
+name: Lektionsbild hochladen
+object: Lesson
+action: upload
+status: observed
+
+operation:
+  name: SetLessonImage
+  sha256Hash: 6498cfd61f61564acf8dad163e9a9fb31b7e144e3040ef6959d9b5f2ed968a6e
+
+endpoint:
+  method: POST
+  path: /graphql
+
+authentication:
+  type: bearer
+  token_request: ../../../docs/authentication.md
+
+parameters:
+  lessonId:
+    type: string
+    required: true
+    id_type: NodeID
+
+request:
+  operationName: SetLessonImage
+  variables:
+    lessonId: "{{lessonId}}"
+  extensions:
+    persistedQuery:
+      version: 1
+      sha256Hash: 6498cfd61f61564acf8dad163e9a9fb31b7e144e3040ef6959d9b5f2ed968a6e
+
+response:
+  success_path: data.setLessonImage
+  cardinality: one
+  type: UploadSpec
+  outputs:
+    id:
+      path: data.setLessonImage.id
+      type: string
+    requestHeaders:
+      path: data.setLessonImage.requestHeaders
+      type: object
+    uploadUrl:
+      path: data.setLessonImage.uploadUrl
+      type: string
+      sensitive: true
+
+upload:
+  method: PUT
+  url: "{{response.uploadUrl}}"
+  headers: "{{response.requestHeaders}}"
+  body_type: binary
+  include_bearer_token: false
+
+verification:
+  operation: TopicQuery
+
+errors:
+  graphQl_errors_path: errors
+  persisted_query_not_found:
+    action: Capture a new RAW request and update sha256Hash.
+
+make_module:
+  name: uploadLessonImage
+  label: Lektionsbild hochladen
+  type: action
+  implementation_status: planned
